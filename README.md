@@ -1,41 +1,124 @@
 # GammaReplication
 
-MySQL Database masked Replication 
+GammaReplication is a tool that reads MySQL binlog using [Maxwell's Daemon](https://github.com/zendesk/maxwell) and replicates data to another MySQL database while masking sensitive information.
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/gamma_replication`. To experiment with that code, run `bin/console` for an interactive prompt.
+## Features
+
+- Real-time replication using MySQL binlog
+- Column-level data masking
+- Flexible hook system for custom data transformation
+- Dry-run mode for operation verification
+
+## Requirements
+
+- Ruby 3.0.0 or higher
+- MySQL 5.7 or higher
+- Maxwell's Daemon
 
 ## Installation
 
-Install the gem and add to the application's Gemfile by executing:
-
 ```bash
-bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+gem install gamma_replication
 ```
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+Or add this line to your application's Gemfile:
+
+```ruby
+gem 'gamma_replication'
+```
+
+## Setup
+
+1. Create configuration files:
 
 ```bash
-gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+bin/setup
+```
+
+This command will create the following files:
+- `config.properties`: Maxwell configuration
+- `settings.yml`: Database connection settings
+- `data.yml`: Table and masking configuration
+- `hooks/`: Masking scripts
+
+2. Edit configuration files:
+
+### settings.yml
+```yaml
+in_database_config:
+  host: localhost
+  port: 3306
+  username: repl_user
+  password: password
+  database: source_db
+
+out_database_config:
+  host: localhost
+  port: 3306
+  username: root
+  password: password
+  database: target_db
+```
+
+### data.yml
+```yaml
+- data:
+    table: "users"
+    hooks:
+      - column:
+          name:
+            - "email"
+          scripts:
+            - "hooks/mask_email.rb"
+      - column:
+          name:
+            - "phone_number"
+          scripts:
+            - "hooks/mask_phone_number.rb"
 ```
 
 ## Usage
 
-TODO: Write usage instructions here
+### Start Replication
+
+```bash
+gamma_replication start -s settings.yml -d data.yml -m config.properties
+```
+
+### Dry Run (Check SQL)
+
+```bash
+gamma_replication dryrun -s settings.yml -d data.yml -m config.properties
+```
+
+## Custom Masking
+
+Create Ruby scripts in the `hooks/` directory to implement custom masking logic:
+
+```ruby
+class MaskEmail
+  def execute(apply, column, value)
+    return value unless apply
+    "masked_#{value}"
+  end
+end
+```
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
-
-## Contributing
-
-Bug reports and pull requests are welcome on GitHub at https://github.com/nishio-dens/gamma_replication. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/nishio-dens/gamma_replication/blob/main/CODE_OF_CONDUCT.md).
+1. Clone the repository
+2. Run `bin/setup` to install dependencies
+3. Run `rake spec` to run the tests
+4. Run `bin/console` for an interactive prompt
 
 ## License
 
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+The gem is available as open source under the terms of the [MIT License](LICENSE.txt).
 
-## Code of Conduct
+## Contributing
 
-Everyone interacting in the GammaReplication project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/nishio-dens/gamma_replication/blob/main/CODE_OF_CONDUCT.md).
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create a new Pull Request

@@ -2,10 +2,9 @@ PATH
   remote: .
   specs:
     gamma_replication (0.1.0)
-      activesupport
-      bigdecimal
-      mysql2
-      thor
+      activesupport (>= 7.0)
+      mysql2 (~> 0.5.5)
+      thor (~> 1.3)
 
 GEM
   remote: https://rubygems.org/
