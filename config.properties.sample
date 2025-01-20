@@ -1,0 +1,5 @@
+host=127.0.0.1
+user=repl_user
+password=testtest
+producer=stdout
+filter=include:tabechoku_developments3.*

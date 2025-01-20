@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+$LOAD_PATH.unshift File.expand_path("../lib", __dir__)
+require "rubygems"
+require "gamma_replication"
+require "thor"
+
+class GammaReplicationCLI < Thor
+  desc "start", "Start replication using Maxwell"
+  option :settings, aliases: "-s", desc: "Database Settings yaml", required: true
+  option :data, aliases: "-d", desc: "Table Sync Settings yaml", required: true
+  option :hook_dir, aliases: "-h", desc: "Hook script directory", default: "."
+  option :maxwell_config, aliases: "-m", desc: "Maxwell configuration file path", required: true
+  def start
+    GammaReplication::Command::Start.new(options).execute
+  end
+
+  desc "dryrun", "Run replication in dry-run mode (output SQL to STDOUT)"
+  option :settings, aliases: "-s", desc: "Database Settings yaml", required: true
+  option :data, aliases: "-d", desc: "Table Sync Settings yaml", required: true
+  option :hook_dir, aliases: "-h", desc: "Hook script directory", default: "."
+  option :maxwell_config, aliases: "-m", desc: "Maxwell configuration file path", required: true
+  def dryrun
+    GammaReplication::Command::Dryrun.new(options).execute
+  end
+
+  desc "version", "version"
+  def version
+    puts GammaReplication::VERSION
+  end
+end
+
+GammaReplicationCLI.start(ARGV)
