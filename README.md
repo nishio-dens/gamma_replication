@@ -14,6 +14,19 @@ GammaReplication is a tool that reads MySQL binlog using [Maxwell's Daemon](http
 - Ruby 3.0.0 or higher
 - MySQL 5.7 or higher
 - Maxwell's Daemon
+- Java 8 or higher (for Maxwell's Daemon)
+
+## Directory Structure
+
+The tool expects Maxwell's Daemon to be available in the same directory:
+
+```
+your_project/
+├── maxwell/
+│   └── bin/
+│       └── maxwell
+└── your_application_files
+```
 
 ## Installation
 
@@ -29,7 +42,17 @@ gem 'gamma_replication'
 
 ## Setup
 
-1. Create configuration files:
+1. Set up Maxwell's Daemon:
+```bash
+# Download Maxwell's Daemon
+wget https://github.com/zendesk/maxwell/releases/download/v1.42.2/maxwell-1.42.2.tar.gz
+tar xvf maxwell-1.42.2.tar.gz
+mv maxwell-1.42.2 maxwell
+
+# The maxwell executable will be available at maxwell/bin/maxwell
+```
+
+2. Create configuration files:
 
 ```bash
 bin/setup
@@ -41,7 +64,22 @@ This command will create the following files:
 - `data.yml`: Table and masking configuration
 - `hooks/`: Masking scripts
 
-2. Edit configuration files:
+3. Configure MySQL:
+   - Enable binlog in your MySQL configuration:
+   ```ini
+   [mysqld]
+   server-id=1
+   log-bin=master
+   binlog_format=row
+   ```
+   - Create a user with replication privileges:
+   ```sql
+   CREATE USER 'maxwell'@'%' IDENTIFIED BY 'maxwell';
+   GRANT ALL ON maxwell.* TO 'maxwell'@'%';
+   GRANT SELECT, REPLICATION CLIENT, REPLICATION SLAVE ON *.* TO 'maxwell'@'%';
+   ```
+
+4. Edit configuration files:
 
 ### settings.yml
 ```yaml
