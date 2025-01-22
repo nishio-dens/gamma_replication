@@ -79,7 +79,7 @@ module GammaReplication
         record = data["data"]
         processed_record = apply_hooks(table_setting, record)
 
-        columns = processed_record.keys
+        columns = processed_record.keys.map { |k| "`#{k}`" }
         values = processed_record.values.map { |v| format_value(v) }
 
         query = "INSERT INTO #{table_setting.table_name} (#{columns.join(",")}) VALUES (#{values.join(",")})"
@@ -91,7 +91,7 @@ module GammaReplication
         old_record = data["old"]
         processed_record = apply_hooks(table_setting, record)
 
-        set_clause = processed_record.map { |k, v| "#{k} = #{format_value(v)}" }.join(",")
+        set_clause = processed_record.map { |k, v| "`#{k}` = #{format_value(v)}" }.join(",")
         where_clause = build_where_clause(old_record, record, table_setting.primary_key)
 
         query = "UPDATE #{table_setting.table_name} SET #{set_clause} WHERE #{where_clause}"
@@ -116,9 +116,11 @@ module GammaReplication
 
       def build_where_clause(old_record, new_record, primary_key)
         if old_record.present? && old_record[primary_key].present?
-          "#{primary_key} = #{format_value(old_record[primary_key])}"
+          "`#{primary_key}` = #{format_value(old_record[primary_key])}"
+        elsif new_record.present? && new_record[primary_key].present?
+          "`#{primary_key}` = #{format_value(new_record[primary_key])}"
         else
-          "#{primary_key} = #{format_value(new_record[primary_key])}"
+          raise "Primary key not found in record. old_record: #{old_record.inspect}, new_record: #{new_record.inspect}"
         end
       end
 
