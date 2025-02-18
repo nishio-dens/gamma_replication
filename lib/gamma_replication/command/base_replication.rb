@@ -140,7 +140,34 @@ module GammaReplication
         when Time
           "'#{value.strftime("%Y-%m-%d %H:%M:%S")}'"
         else
-          "'#{@out_client.client.escape(value.to_s)}'"
+          if json_column?(value)
+            sanitized_value = sanitize_json(value)
+            "'#{@out_client.client.escape(sanitized_value)}'"
+          else
+            "'#{@out_client.client.escape(value.to_s)}'"
+          end
+        end
+      end
+
+      def json_column?(value)
+        value.is_a?(String) && (value.start_with?("{") || value.start_with?("["))
+      end
+
+      def sanitize_json(value)
+        JSON.parse(value)
+        value
+      rescue JSON::ParserError => e
+        sanitized = value.gsub(/([{,]\s*)(\w+)(\s*:)/) do
+          "#{::Regexp.last_match(1)}\"#{::Regexp.last_match(2)}\"#{::Regexp.last_match(3)}"
+        end
+        sanitized = sanitized.gsub(/:\s*([^",\s\d\[\]{}-].*?)(,|\}|$)/) do
+          ": \"#{::Regexp.last_match(1)}\"#{::Regexp.last_match(2)}"
+        end
+        begin
+          JSON.parse(sanitized)
+          sanitized
+        rescue JSON::ParserError
+          value.to_json
         end
       end
 
