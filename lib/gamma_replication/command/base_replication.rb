@@ -64,15 +64,20 @@ module GammaReplication
         table_setting = @table_settings[data["table"]]
         case data["type"]
         when "insert"
+          return unless data["data"].present?
+
           process_insert(table_setting, data)
         when "update"
+          return unless data["data"].present?
+
           process_update(table_setting, data)
         when "delete"
+          return unless data["old"].present?
+
           process_delete(table_setting, data)
         end
       rescue StandardError => e
-        logger.error(e)
-        # Nothing
+        logger.error("Error processing #{data["type"]} operation for table #{data["table"]}: #{e.message}")
       end
 
       def process_insert(table_setting, data)
@@ -100,8 +105,9 @@ module GammaReplication
 
       def process_delete(table_setting, data)
         old_record = data["old"]
-        where_clause = build_where_clause(old_record, nil, table_setting.primary_key)
+        return unless old_record.present? && old_record[table_setting.primary_key].present?
 
+        where_clause = build_where_clause(old_record, nil, table_setting.primary_key)
         query = "DELETE FROM #{table_setting.table_name} WHERE #{where_clause}"
         execute_query(query)
       end
@@ -120,7 +126,8 @@ module GammaReplication
         elsif new_record.present? && new_record[primary_key].present?
           "`#{primary_key}` = #{format_value(new_record[primary_key])}"
         else
-          raise "Primary key not found in record. old_record: #{old_record.inspect}, new_record: #{new_record.inspect}"
+          logger.error("Primary key not found. old_record: #{old_record.inspect}, new_record: #{new_record.inspect}")
+          raise "Primary key '#{primary_key}' not found in record"
         end
       end
 
