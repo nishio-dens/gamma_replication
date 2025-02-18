@@ -100,7 +100,8 @@ module GammaReplication
 
         process_data_by_type(data)
       rescue StandardError => e
-        logger.error(e)
+        error_message = e.message.to_s.split("\n").first
+        logger.error("Error: #{error_message.gsub(/\s+/, " ")}")
       end
 
       def should_process_data?(data)
@@ -132,7 +133,8 @@ module GammaReplication
           process_delete(table_setting, data)
         end
       rescue StandardError => e
-        logger.error("Error processing data: #{data["table"]} - #{e.message}")
+        error_message = e.message.to_s.split("\n").first
+        logger.error("Error processing #{data["type"]} for table #{data["table"]}: #{error_message.gsub(/\s+/, " ")}")
       end
 
       def process_insert(table_setting, data)

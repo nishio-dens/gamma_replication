@@ -19,8 +19,9 @@ module GammaReplication
         io.each do |line|
           data = JSON.parse(line.strip)
           block.call(data) if block_given?
-        rescue JSON::ParserError => e
-          logger.error("Failed to parse Maxwell output: #{e.message}")
+        rescue JSON::ParserError
+          # Ignore Maxwell's non-JSON output (startup messages, etc)
+          next
         end
       end
     end
