@@ -12,6 +12,8 @@ class GammaReplicationCLI < Thor
   option :data, aliases: "-d", desc: "Table Sync Settings yaml", required: true
   option :hook_dir, aliases: "-h", desc: "Hook script directory", default: "."
   option :maxwell_config, aliases: "-m", desc: "Maxwell configuration file path", required: true
+  option :enable_stats, type: :boolean, desc: "Enable statistics output (default: true)"
+  option :stats_interval, type: :numeric, desc: "Statistics output interval in seconds (default: 10800)"
   def start
     GammaReplication::Command::Start.new(options).execute
   end
@@ -21,6 +23,8 @@ class GammaReplicationCLI < Thor
   option :data, aliases: "-d", desc: "Table Sync Settings yaml", required: true
   option :hook_dir, aliases: "-h", desc: "Hook script directory", default: "."
   option :maxwell_config, aliases: "-m", desc: "Maxwell configuration file path", required: true
+  option :enable_stats, type: :boolean, desc: "Enable statistics output (default: true)"
+  option :stats_interval, type: :numeric, desc: "Statistics output interval in seconds (default: 10800)"
   def dryrun
     GammaReplication::Command::Dryrun.new(options).execute
   end

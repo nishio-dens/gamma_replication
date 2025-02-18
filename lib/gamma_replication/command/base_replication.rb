@@ -8,6 +8,9 @@ module GammaReplication
         setup_database(opts)
         setup_parser(opts)
         setup_maxwell(opts)
+        initialize_stats
+        @enable_stats = opts[:enable_stats].nil? ? true : opts[:enable_stats]
+        @stats_interval = (opts[:stats_interval] || 3 * 60 * 60).to_i # Default: 3 hours in seconds
       end
 
       def execute
@@ -18,12 +21,61 @@ module GammaReplication
           hash[table.table_name] = table
         end
         before_start if respond_to?(:before_start)
+
+        setup_stats_reporter if @enable_stats
+
         @maxwell_client.start do |data|
           process_maxwell_data(data)
         end
       end
 
       private
+
+      def initialize_stats
+        @stats = {
+          total: { insert: 0, update: 0, delete: 0 },
+          by_table: {}
+        }
+        @stats_mutex = Mutex.new
+      end
+
+      def setup_stats_reporter
+        @stats_thread = Thread.new do
+          loop do
+            sleep @stats_interval
+            output_stats
+            reset_stats
+          end
+        end
+      end
+
+      def update_stats(table_name, operation)
+        return unless @enable_stats
+
+        @stats_mutex.synchronize do
+          @stats[:total][operation] += 1
+          @stats[:by_table][table_name] ||= { insert: 0, update: 0, delete: 0 }
+          @stats[:by_table][table_name][operation] += 1
+        end
+      end
+
+      def reset_stats
+        @stats_mutex.synchronize do
+          initialize_stats
+        end
+      end
+
+      def output_stats
+        @stats_mutex.synchronize do
+          total_stats = "Total[ins:#{@stats[:total][:insert]},upd:#{@stats[:total][:update]},del:#{@stats[:total][:delete]}]"
+
+          table_stats = @stats[:by_table].map do |table, counts|
+            "#{table}[ins:#{counts[:insert]},upd:#{counts[:update]},del:#{counts[:delete]}]"
+          end.join(" ")
+
+          logger.info("Replication Stats | #{total_stats} | Tables: #{table_stats}")
+        end
+      end
 
       def setup_database(opts)
         @database_settings = GammaReplication::DatabaseSettings.new(opts[:settings])
@@ -66,18 +118,21 @@ module GammaReplication
         when "insert"
           return unless data["data"].present?
 
+          update_stats(data["table"], :insert)
           process_insert(table_setting, data)
         when "update"
           return unless data["data"].present?
 
+          update_stats(data["table"], :update)
           process_update(table_setting, data)
         when "delete"
           return unless data["old"].present?
 
+          update_stats(data["table"], :delete)
           process_delete(table_setting, data)
         end
       rescue StandardError => e
-        logger.error("Error processing #{data["type"]} operation for table #{data["table"]}: #{e.message}")
+        logger.error("Error processing data: #{data["table"]} - #{e.message}")
       end
 
       def process_insert(table_setting, data)
