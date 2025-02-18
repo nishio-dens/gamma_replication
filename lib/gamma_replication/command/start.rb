@@ -17,7 +17,6 @@ module GammaReplication
         @out_client.client.query(query)
       rescue StandardError => e
         logger.error("Query execution failed: #{e.message}")
-        logger.error(e.backtrace.join("\n"))
       end
 
       def finalize
