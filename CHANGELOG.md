@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.2] - 2024-02-18
+
+### Added
+- Added configurable statistics reporting feature
+- Added command line options for enabling/disabling statistics (--enable-stats)
+- Added command line option for setting statistics interval (--stats-interval)
+
+### Enhanced
+- Improved JSON data handling with automatic sanitization
+- Enhanced logging format for better CloudWatch Logs integration
+
 ## [0.1.1] - 2024-01-21
 
 ### Fixed
