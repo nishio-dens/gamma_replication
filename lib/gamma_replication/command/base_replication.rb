@@ -67,13 +67,13 @@ module GammaReplication
 
       def output_stats
         @stats_mutex.synchronize do
-          total_stats = "Total[ins:#{@stats[:total][:insert]},upd:#{@stats[:total][:update]},del:#{@stats[:total][:delete]}]"
+          total_stats = "Total[ins:#{@stats[:total][:insert]} | upd:#{@stats[:total][:update]} | del:#{@stats[:total][:delete]}]"
 
           table_stats = @stats[:by_table].map do |table, counts|
-            "#{table}[ins:#{counts[:insert]},upd:#{counts[:update]},del:#{counts[:delete]}]"
-          end.join(" ")
+            "#{table}[ins:#{counts[:insert]} | upd:#{counts[:update]} | del:#{counts[:delete]}]"
+          end.join("\n")
 
-          logger.info("Replication Stats | #{total_stats} | Tables: #{table_stats}")
+          logger.info("STATS | #{total_stats}\n#{table_stats}")
         end
       end
 
