@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.4] - 2024-02-18
+
+### Enhanced
+- Simplified error messages by removing stack traces
+
 ## [0.1.3] - 2024-02-18
 
 ### Enhanced
