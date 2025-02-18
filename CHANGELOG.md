@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.3] - 2024-02-18
+
+### Enhanced
+- Improved error logging format for better CloudWatch Logs integration
+
 ## [0.1.2] - 2024-02-18
 
 ### Added
