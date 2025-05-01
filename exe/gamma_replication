@@ -14,6 +14,7 @@ class GammaReplicationCLI < Thor
   option :maxwell_config, aliases: "-m", desc: "Maxwell configuration file path", required: true
   option :enable_stats, type: :boolean, desc: "Enable statistics output (default: true)"
   option :stats_interval, type: :numeric, desc: "Statistics output interval in seconds (default: 10800)"
+  option :force, type: :boolean, desc: "Disable foreign key checks during replication", default: false
   def start
     GammaReplication::Command::Start.new(options).execute
   end

@@ -3,9 +3,10 @@
 module GammaReplication
   module Command
     class Start < BaseReplication
-      def initialize(*)
+      def initialize(opts)
         super
-        @out_client.client.query("SET FOREIGN_KEY_CHECKS = 0")
+        @force_mode = opts[:force]
+        @out_client.client.query("SET FOREIGN_KEY_CHECKS = 0") if @force_mode
       end
 
       def apply_mode?
@@ -16,11 +17,12 @@ module GammaReplication
         logger.info("Executing: #{query}") if ENV["DEBUG"]
         @out_client.client.query(query)
       rescue StandardError => e
-        logger.error("Query execution failed: #{e.message}")
+        error_message = e.message.to_s.split("\n").first
+        logger.error("Query execution failed: #{error_message.gsub(/\s+/, " ")}")
       end
 
       def finalize
-        @out_client.client.query("SET FOREIGN_KEY_CHECKS = 1")
+        @out_client.client.query("SET FOREIGN_KEY_CHECKS = 1") if @force_mode
         super
       end
     end

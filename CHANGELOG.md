@@ -1,16 +1,21 @@
 # Changelog
 
-## [0.1.4] - 2024-02-18
+## [0.1.4] - 2025-05-01
+
+### Added
+- Added --force option to control foreign key checks during replication
 
 ### Enhanced
 - Simplified error messages by removing stack traces
+- Consolidated multi-line error messages into single lines
+- Improved Maxwell client to silently handle non-JSON output
 
-## [0.1.3] - 2024-02-18
+## [0.1.3] - 2025-02-18
 
 ### Enhanced
 - Improved error logging format for better CloudWatch Logs integration
 
-## [0.1.2] - 2024-02-18
+## [0.1.2] - 2025-02-18
 
 ### Added
 - Added configurable statistics reporting feature
@@ -21,13 +26,13 @@
 - Improved JSON data handling with automatic sanitization
 - Enhanced logging format for better CloudWatch Logs integration
 
-## [0.1.1] - 2024-01-21
+## [0.1.1] - 2025-01-21
 
 ### Fixed
 - Fixed SQL syntax error when using MySQL reserved words as column names by properly escaping them with backticks
 - Fixed error handling in DELETE operations when primary key is missing
 
-## [0.1.0] - 2024-01-20
+## [0.1.0] - 2025-01-20
 
 ### Added
 - Initial release
