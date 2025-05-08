@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.6] - 2024-02-18
+
+### Enhanced
+- Improved fatal error handling: now retries up to 3 times for critical errors (e.g., Out of memory, Disk full, etc.) and exits if not recoverable
+- Refactored error pattern matching for better readability and maintainability
+
 ## [0.1.5] - 2025-05-01
 
 ### Added
